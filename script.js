@@ -376,8 +376,13 @@ updateWheel();
       }
 
       const mobile = window.matchMedia('(max-width: 760px)').matches;
-      const finalLeft = finalRect.left - heroRect.left;
-      const finalTop = finalRect.top - heroRect.top;
+      // On mobile, animate in the image's real parent (.hero-visual). This
+      // removes coordinate drift caused by moving the image between containers.
+      const animationOrigin = mobile ? visualRect : heroRect;
+      const animationWidth = mobile ? visualRect.width : heroWidth;
+      const animationHeight = mobile ? visualRect.height : heroHeight;
+      const finalLeft = finalRect.left - animationOrigin.left;
+      const finalTop = finalRect.top - animationOrigin.top;
       const finalCenter = {
         x: finalLeft + carWidth / 2,
         y: finalTop + carHeight / 2
@@ -391,13 +396,12 @@ updateWheel();
         // from the heading into the card looks physically impossible, so the
         // car now enters at the visual card's own height and drives straight
         // along its horizontal centreline into the exact final parking slot.
-        const visualLeft = visualRect.left - heroRect.left;
-        const visualTop = visualRect.top - heroRect.top;
-        const visualCenterY = visualTop + visualRect.height / 2;
-        const startX = visualLeft - carWidth * 0.58;
-        p0 = { x: startX, y: visualCenterY };
-        p1 = { x: startX + (finalCenter.x - startX) * 0.32, y: visualCenterY };
-        p2 = { x: startX + (finalCenter.x - startX) * 0.72, y: visualCenterY };
+        const startX = -carWidth * 0.58;
+        // Keep the whole route on the final image centreline so the last
+        // animation frame is exactly transform: translate(0, 0).
+        p0 = { x: startX, y: finalCenter.y };
+        p1 = { x: startX + (finalCenter.x - startX) * 0.32, y: finalCenter.y };
+        p2 = { x: startX + (finalCenter.x - startX) * 0.72, y: finalCenter.y };
         p3 = { x: finalCenter.x, y: finalCenter.y };
         duration = 4300;
       } else {
@@ -423,40 +427,46 @@ updateWheel();
         duration = 4700;
       }
 
-      // Keep the animation scene anchored inside the hero section itself.
-      // Its coordinates are measured relative to the hero, so normal page
-      // scrolling moves the whole section naturally without steering the car.
+      // Mobile: keep the real image in its final flex-layout slot and animate
+      // only its transform. The track SVG shares .hero-visual coordinates.
+      // Desktop: retain the original hero-level overlay animation.
       Object.assign(scene.style, {
         position: 'absolute',
         left: '0',
         top: '0',
-        width: `${fmt(heroWidth)}px`,
-        height: `${fmt(heroHeight)}px`,
+        width: `${fmt(animationWidth)}px`,
+        height: `${fmt(animationHeight)}px`,
         inset: 'auto',
         display: 'block',
-        overflow: 'visible',
-        pointerEvents: 'none'
+        overflow: mobile ? 'hidden' : 'visible',
+        pointerEvents: 'none',
+        zIndex: mobile ? '1' : '8'
       });
 
-      scene.appendChild(heroCar);
-      movedToScene = true;
-      Object.assign(heroCar.style, {
-        position: 'absolute',
-        left: `${fmt(finalLeft)}px`,
-        top: `${fmt(finalTop)}px`,
-        width: `${fmt(carWidth)}px`,
-        height: `${fmt(carHeight)}px`,
-        maxWidth: 'none',
-        maxHeight: 'none',
-        margin: '0',
-        zIndex: '9',
-        opacity: '1',
-        transform: 'none',
-        objectFit: 'contain',
-        pointerEvents: 'none',
-        transition: 'none',
-        willChange: 'transform'
-      });
+      if (mobile) {
+        heroVisual.appendChild(scene);
+        heroCar.style.willChange = 'transform';
+      } else {
+        scene.appendChild(heroCar);
+        movedToScene = true;
+        Object.assign(heroCar.style, {
+          position: 'absolute',
+          left: `${fmt(finalLeft)}px`,
+          top: `${fmt(finalTop)}px`,
+          width: `${fmt(carWidth)}px`,
+          height: `${fmt(carHeight)}px`,
+          maxWidth: 'none',
+          maxHeight: 'none',
+          margin: '0',
+          zIndex: '9',
+          opacity: '1',
+          transform: 'none',
+          objectFit: 'contain',
+          pointerEvents: 'none',
+          transition: 'none',
+          willChange: 'transform'
+        });
+      }
 
       const frameCount = mobile ? 56 : 52;
       const keyframes = [];
@@ -527,7 +537,7 @@ updateWheel();
 
       const upperTrack = makeTrack(-1);
       const lowerTrack = makeTrack(1);
-      svg.setAttribute('viewBox', `0 0 ${fmt(heroWidth)} ${fmt(heroHeight)}`);
+      svg.setAttribute('viewBox', `0 0 ${fmt(animationWidth)} ${fmt(animationHeight)}`);
       svg.setAttribute('preserveAspectRatio', 'none');
 
       // Draw only the part of the route after the car enters the visible scene.
