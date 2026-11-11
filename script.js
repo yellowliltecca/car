@@ -297,11 +297,24 @@ updateWheel();
   let safetyTimer = null;
   let trackAnimations = [];
   let tracksPending = false;
+  let resizeHandler = null;
+  let orientationHandler = null;
 
   const settleAtFinalLayout = (keepTracks = false) => {
     if (settled) return;
     settled = true;
     if (safetyTimer) window.clearTimeout(safetyTimer);
+
+    // Mobile browsers can emit a resize event when their address bar collapses
+    // during page scrolling. Remove listeners only when the intro really ends.
+    if (resizeHandler) {
+      window.removeEventListener('resize', resizeHandler);
+      resizeHandler = null;
+    }
+    if (orientationHandler) {
+      window.removeEventListener('orientationchange', orientationHandler);
+      orientationHandler = null;
+    }
 
     if (carAnimation) {
       try { carAnimation.cancel(); } catch (_) {}
@@ -576,9 +589,20 @@ updateWheel();
         if (!settled) settleAtFinalLayout(true);
       }, duration + 1100);
 
-      window.addEventListener('resize', () => {
-        if (!settled) settleAtFinalLayout();
-      }, { once: true });
+      // Scrolling on mobile may resize the *visible height* as browser
+      // chrome expands/collapses. That must not cancel the driving animation.
+      // Only finish early if the actual layout width changes substantially
+      // (for example, the phone is rotated during the intro).
+      const introLayoutWidth = document.documentElement.clientWidth || window.innerWidth;
+      resizeHandler = () => {
+        const currentLayoutWidth = document.documentElement.clientWidth || window.innerWidth;
+        if (Math.abs(currentLayoutWidth - introLayoutWidth) > 48) {
+          settleAtFinalLayout();
+        }
+      };
+      orientationHandler = () => settleAtFinalLayout();
+      window.addEventListener('resize', resizeHandler, { passive: true });
+      window.addEventListener('orientationchange', orientationHandler, { once: true });
 
       Promise.allSettled(trackAnimations.map(animation => animation.finished)).then(() => {
         tracksPending = false;
