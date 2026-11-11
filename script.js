@@ -325,6 +325,7 @@ updateWheel();
       heroCar.removeAttribute('style');
     } else {
       heroCar.style.opacity = '1';
+      heroCar.style.removeProperty('will-change');
     }
 
     if (!keepTracks) {
