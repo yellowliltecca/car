@@ -91,6 +91,36 @@ let isDragging = false;
 let snapTimer = null;
 const buttons = [];
 
+// Mobile: three service labels on the lower semicircle. The tire itself still
+// rotates with touch gestures; the labels stay readable and cannot overlap.
+const mobileServiceRail = document.createElement('div');
+mobileServiceRail.className = 'wheel-mobile-labels';
+mobileServiceRail.setAttribute('aria-label', 'Ближайшие направления услуг');
+const mobileServiceButtons = ['previous', 'current', 'next'].map(slot => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `wheel-mobile-choice wheel-mobile-choice--${slot}`;
+  button.dataset.slot = slot;
+  mobileServiceRail.appendChild(button);
+  return button;
+});
+viewport.appendChild(mobileServiceRail);
+let mobileRenderedIndex = -1;
+
+function renderMobileServiceRail() {
+  const isMobile = window.matchMedia('(max-width: 760px)').matches;
+  mobileServiceRail.hidden = !isMobile;
+  if (!isMobile || mobileRenderedIndex === activeIndex) return;
+  mobileServiceButtons.forEach((button, offset) => {
+    const index = (activeIndex + offset - 1 + services.length) % services.length;
+    button.textContent = services[index].kicker;
+    button.setAttribute('aria-label', services[index].title);
+    button.setAttribute('aria-pressed', offset === 1 ? 'true' : 'false');
+    button.onclick = () => selectService(index);
+  });
+  mobileRenderedIndex = activeIndex;
+}
+
 services.forEach((service, index) => {
   const point = document.createElement('div');
   point.className = 'orbit-point';
@@ -195,6 +225,7 @@ function updateWheel() {
     renderedIndex = activeIndex;
   }
 
+  renderMobileServiceRail();
   lastRotation = rotation;
 }
 
@@ -244,7 +275,7 @@ viewport.addEventListener('pointerdown', event => {
   try {
     // Capture on the pressed service button when applicable, so its click
     // event remains intact; otherwise capture on the viewport for free dragging.
-    const captureTarget = event.target.closest('.orbit-item') || viewport;
+    const captureTarget = event.target.closest('.orbit-item, .wheel-mobile-choice') || viewport;
     captureTarget.setPointerCapture(event.pointerId);
   } catch (_) {
     // Pointer capture is not available in every embedded browser.
