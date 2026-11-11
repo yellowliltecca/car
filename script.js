@@ -9,7 +9,7 @@ const services = [
     kicker: 'Двигатель',
     title: 'Ремонт двигателя',
     description: 'Работы по диагностике и ремонту двигателя, а также обслуживание связанных с ним узлов.',
-    items: ['Ремонт двигателя', 'Замена ремня ГРМ', 'Ремонт карбюраторов', 'Эндоскопия двигателя']
+    items: ['Ремонт двигателя', 'Замена ремня ГРМ', 'Ремонт карбюраторов']
   },
   {
     kicker: 'Трансмиссия',
@@ -77,6 +77,7 @@ const serviceKicker = document.getElementById('serviceKicker');
 const serviceTitle = document.getElementById('serviceTitle');
 const serviceDescription = document.getElementById('serviceDescription');
 const serviceList = document.getElementById('serviceList');
+const serviceCount = document.getElementById('serviceCount');
 const panelIndex = document.getElementById('panelIndex');
 
 const step = 360 / services.length;
@@ -142,6 +143,9 @@ function renderPanel(index, direction = 1) {
   panelIndex.textContent = String(index + 1).padStart(2, '0');
 
   serviceList.innerHTML = '';
+  if (serviceCount) {
+    serviceCount.textContent = `В СПИСКЕ: ${String(service.items.length).padStart(2, '0')}`;
+  }
   service.items.forEach((item, itemIndex) => {
     const li = document.createElement('li');
     li.textContent = item;
