@@ -673,3 +673,84 @@ body.intro-pending .hero-car { opacity: 0; }
   .panel-bottom .button { width: 100%; min-height: 48px; }
   .panel-index { right: 8px; bottom: -34px; font-size: 130px; }
 }
+
+
+/* Mobile vehicle full-bleed + non-overlapping three-choice tire catalogue */
+.wheel-mobile-labels { display: none; }
+
+@media (max-width: 760px) {
+  /* The old 16px shell margins and minimum image-box height created visible
+     whitespace. Only the car block becomes edge-to-edge; the text stays padded. */
+  .hero {
+    gap: 18px;
+    padding-bottom: 0;
+  }
+  .hero-visual {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-right: -16px;
+    min-height: 0;
+    border-radius: 0;
+  }
+  .hero-car {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+  }
+
+  /* On narrow viewports, 11 simultaneous labels overlap. Show only the
+     selected direction and its immediate neighbors along the bottom arc. */
+  .orbit-items { display: none; }
+  .wheel-mobile-labels {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+  }
+  .wheel-mobile-labels[hidden] { display: none !important; }
+  .wheel-mobile-choice {
+    pointer-events: auto;
+    cursor: pointer;
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    transform: translate(-50%, -50%);
+    width: clamp(84px, 26vw, 102px);
+    min-height: 38px;
+    padding: 7px 6px;
+    color: #ecf4fa;
+    background: rgba(12, 30, 47, .9);
+    border: 1px solid rgba(231, 243, 251, .35);
+    border-radius: 999px;
+    box-shadow: 0 5px 15px rgba(3, 18, 28, .2);
+    font-family: var(--font);
+    font-size: clamp(8.8px, 2.5vw, 10px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: .015em;
+    text-align: center;
+    text-transform: uppercase;
+    overflow-wrap: normal;
+    transition: background .2s, color .2s, transform .2s, box-shadow .2s;
+  }
+  .wheel-mobile-choice--previous { left: 16%; top: 56%; }
+  .wheel-mobile-choice--next { left: 84%; top: 56%; }
+  .wheel-mobile-choice--current {
+    left: 50%;
+    top: 79%;
+    width: clamp(122px, 36vw, 148px);
+    min-height: 46px;
+    padding: 8px 10px;
+    color: #10304d;
+    background: #f8fcff;
+    border: 2px solid #fff;
+    box-shadow: 0 10px 25px rgba(3, 18, 28, .3);
+    font-size: clamp(11.3px, 3vw, 13px);
+  }
+  .wheel-mobile-choice:focus-visible {
+    outline: 2px solid #2475bd;
+    outline-offset: 3px;
+  }
+}
