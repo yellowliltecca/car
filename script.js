@@ -295,26 +295,13 @@ updateWheel();
   const svg = document.querySelector('.drive-tracks-svg');
   if (!body || !hero || !heading || !heroVisual || !heroCar || !scene || !svg) return;
 
-  let movedToOverlay = false;
+  let movedToScene = false;
   let settled = false;
   let carAnimation = null;
   let safetyTimer = null;
   let trackAnimations = [];
   let tracksPending = false;
-  let introLayer = null;
-  let scrollSyncHandler = null;
   let orientationHandler = null;
-
-  const cleanupIntroLayer = () => {
-    if (scrollSyncHandler) {
-      window.removeEventListener('scroll', scrollSyncHandler);
-      scrollSyncHandler = null;
-    }
-    if (introLayer) {
-      introLayer.remove();
-      introLayer = null;
-    }
-  };
 
   const settleAtFinalLayout = (keepTracks = false) => {
     if (settled) return;
@@ -333,7 +320,7 @@ updateWheel();
       carAnimation = null;
     }
 
-    if (movedToOverlay && heroCar.parentElement !== heroVisual) {
+    if (movedToScene && heroCar.parentElement !== heroVisual) {
       heroVisual.appendChild(heroCar);
       heroCar.removeAttribute('style');
     } else {
@@ -344,10 +331,8 @@ updateWheel();
       trackAnimations.forEach(animation => { try { animation.cancel(); } catch (_) {} });
       tracksPending = false;
       scene.classList.add('is-hidden');
-      cleanupIntroLayer();
     } else if (!tracksPending) {
       scene.classList.add('is-hidden');
-      cleanupIntroLayer();
     }
     body.classList.remove('intro-pending');
     body.classList.add('intro-done');
@@ -438,38 +423,13 @@ updateWheel();
         duration = 4700;
       }
 
-      // Put the existing car and its tyre marks in a viewport overlay. The
-      // overlay is shifted by the page scroll position, so the animation keeps
-      // its exact document-space path while the user scrolls the page.
-      const readScrollX = () => window.scrollX || document.documentElement.scrollLeft || 0;
-      const readScrollY = () => window.scrollY || document.documentElement.scrollTop || 0;
-      const syncOverlayToPageScroll = () => {
-        if (!introLayer) return;
-        introLayer.style.transform =
-          `translate3d(${-readScrollX()}px, ${-readScrollY()}px, 0)`;
-      };
-
-      introLayer = document.createElement('div');
-      introLayer.className = 'hero-intro-layer';
-      Object.assign(introLayer.style, {
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        width: '100vw',
-        height: '100vh',
-        overflow: 'visible',
-        pointerEvents: 'none',
-        zIndex: '8',
-        transformOrigin: '0 0',
-        willChange: 'transform'
-      });
-      syncOverlayToPageScroll();
-      body.appendChild(introLayer);
-
+      // Keep the animation scene anchored inside the hero section itself.
+      // Its coordinates are measured relative to the hero, so normal page
+      // scrolling moves the whole section naturally without steering the car.
       Object.assign(scene.style, {
         position: 'absolute',
-        left: `${fmt(heroRect.left + readScrollX())}px`,
-        top: `${fmt(heroRect.top + readScrollY())}px`,
+        left: '0',
+        top: '0',
         width: `${fmt(heroWidth)}px`,
         height: `${fmt(heroHeight)}px`,
         inset: 'auto',
@@ -477,15 +437,9 @@ updateWheel();
         overflow: 'visible',
         pointerEvents: 'none'
       });
-      introLayer.appendChild(scene);
 
-      scrollSyncHandler = syncOverlayToPageScroll;
-      window.addEventListener('scroll', scrollSyncHandler, { passive: true });
-
-      // The scene itself is now the car's containing block. Its dimensions
-      // match the hero, so all measured start/end coordinates remain unchanged.
       scene.appendChild(heroCar);
-      movedToOverlay = true;
+      movedToScene = true;
       Object.assign(heroCar.style, {
         position: 'absolute',
         left: `${fmt(finalLeft)}px`,
@@ -661,7 +615,6 @@ updateWheel();
       Promise.allSettled(trackAnimations.map(animation => animation.finished)).then(() => {
         tracksPending = false;
         scene.classList.add('is-hidden');
-        cleanupIntroLayer();
       });
     } catch (error) {
       settleAtFinalLayout();
