@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef3f7">
+  <meta name="description" content="АвтоЦех № 1 в Энгельсе — диагностика, техническое обслуживание и ремонт автомобилей. Услуги, контакты и запись по телефону.">
+  <title>АвтоЦех № 1 — автосервис в Энгельсе</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="intro-pending">
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="АвтоЦех № 1 — главная">АВТОЦЕХ <span>№ 1</span></a>
+    <nav class="main-nav" aria-label="Основная навигация">
+      <a class="nav-link active" href="#services">Услуги</a>
+      <a class="nav-link" href="#about">О сервисе</a>
+      <a class="nav-link" href="#contacts">Контакты</a>
+    </nav>
+    <a class="header-phone" href="tel:+79063083900">+7 906 308-39-00</a>
+    <a class="header-cta" href="tel:+79063083900">Записаться</a>
+  </header>
+
+  <main id="top">
+    <section class="hero section-shell">
+      <div class="hero-copy">
+        <div class="eyebrow">АВТОСЕРВИС В ЭНГЕЛЬСЕ</div>
+        <h1>Точный подход<br>к ремонту <span>вашего</span><br>автомобиля</h1>
+        <p class="hero-description">Диагностика, обслуживание и ремонт основных систем автомобиля. Выберите направление и узнайте, какие работы выполняет сервис.</p>
+        <div class="hero-actions">
+          <a class="button button-dark" href="#services">Смотреть услуги</a>
+          <a class="text-link" href="tel:+79063083900">Позвонить в сервис</a>
+        </div>
+        <div class="hero-meta">
+          <div><strong>09:00–18:00</strong><span>Пн — Сб</span></div>
+          <div><strong>г. Энгельс</strong><span>ул. Пушкина, 98</span></div>
+        </div>
+      </div>
+      <div class="hero-visual" aria-label="Синий автомобиль BMW, вид сверху">
+        <div class="hero-visual-top"><span>АВТОЦЕХ № 1</span><span>СЕРВИС И РЕМОНТ</span></div>
+        <div class="hero-car-glow"></div>
+        <img class="hero-car" src="assets/bmw-hero.png" alt="Синий автомобиль, вид сверху, передняя часть направлена вправо">
+        <div class="hero-visual-bottom"><span>АВТОМОБИЛЬНЫЙ СЕРВИС</span><span>ENGELS / 64</span></div>
+      </div>
+      <div class="hero-drive-scene" aria-hidden="true">
+        <svg class="drive-tracks-svg" aria-hidden="true" focusable="false">
+          <defs>
+            <pattern id="tireTreadPattern" patternUnits="userSpaceOnUse" width="34" height="20">
+              <rect width="34" height="20" fill="#263947" opacity=".99"></rect>
+              <path d="M0 1H34 M0 19H34" stroke="#07131c" stroke-width="1.4" opacity=".95"></path>
+              <path d="M1 3L10 2L14 8L5 9Z M18 11L27 10L33 16L24 18Z" fill="#0a1721"></path>
+              <path d="M17 2L26 2L21 8L12 9Z M0 12L8 11L13 17L4 18Z" fill="#101f2b"></path>
+              <path d="M3 3L10 3 M19 12L27 12 M17 3L24 3 M1 13L8 13" stroke="#a4b2bc" stroke-width=".8" opacity=".48"></path>
+              <path d="M6 3L8 8 M23 12L26 16 M20 3L17 8 M4 12L2 17" stroke="#81939f" stroke-width=".65" opacity=".42"></path>
+              <path d="M15 0L12 5L16 10L13 15L16 20" fill="none" stroke="#050d14" stroke-width="1.25" opacity=".92"></path>
+              <path d="M0 10H34" stroke="#526674" stroke-width=".55" opacity=".28"></path>
+            </pattern>
+          </defs>
+          <path class="tire-track-shadow" data-track="upper"></path>
+          <path class="tire-track-shadow" data-track="lower"></path>
+          <path class="tire-track-base" data-track="upper"></path>
+          <path class="tire-track-base" data-track="lower"></path>
+          <path class="tire-track-tread" data-track="upper"></path>
+          <path class="tire-track-tread" data-track="lower"></path>
+        </svg>
+      </div>
+    </section>
+
+    <section class="service-section" id="services">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">НАПРАВЛЕНИЯ РАБОТ</div>
+          <h2>Услуги автосервиса</h2>
+        </div>
+        <p>Вращайте круговой каталог — содержимое информационной панели будет меняться вместе с выбранным направлением.</p>
+      </div>
+
+      <div class="service-layout">
+        <div class="wheel-column">
+          <div class="wheel-viewport" aria-label="Круговой каталог услуг. Прокрутите колесо мыши или проведите пальцем, чтобы сменить направление." tabindex="0">
+            <div class="wheel-rotor">
+              <img class="wheel-tire" src="assets/service-wheel.png" alt="" aria-hidden="true">
+              <div class="wheel-ring wheel-ring-outer"></div>
+              <div class="wheel-ring wheel-ring-inner"></div>
+              <div class="orbit-items" id="orbitItems"></div>
+            </div>
+            <div class="wheel-hint"><span class="hint-line"></span><span class="desktop-hint">ВРАЩАЙТЕ КОЛЕСОМ МЫШИ</span><span class="mobile-hint">ПРОВЕДИТЕ ПО ДУГЕ</span></div>
+          </div>
+        </div>
+
+        <article class="service-panel" aria-live="polite">
+          <div class="panel-topline"><span id="serviceNumber">01 / 11</span><span>НАПРАВЛЕНИЕ РАБОТ</span></div>
+          <div class="panel-content">
+            <div class="panel-copy">
+              <div class="panel-kicker" id="serviceKicker">ДИАГНОСТИКА</div>
+              <h3 id="serviceTitle">Диагностика автомобиля</h3>
+              <p id="serviceDescription">Проверка систем автомобиля для выявления неисправностей и определения дальнейшего объёма работ.</p>
+            </div>
+            <div class="service-divider"></div>
+            <div class="included-heading">В ЭТО НАПРАВЛЕНИЕ ВХОДИТ</div>
+            <ul class="service-list" id="serviceList"></ul>
+            <div class="panel-bottom">
+              <span class="panel-note">Состав и стоимость работ уточняются при обращении.</span>
+              <a class="button button-dark" href="tel:+79063083900">Уточнить по телефону</a>
+            </div>
+          </div>
+          <div class="panel-index" id="panelIndex">01</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="about-section section-shell" id="about">
+      <div class="about-heading">
+        <div class="eyebrow">АВТОЦЕХ № 1</div>
+        <h2>Ремонт и обслуживание<br><span>в одном месте</span></h2>
+      </div>
+      <div class="about-copy">
+        <p>В карточке автосервиса указаны работы с двигателем, ходовой частью, тормозной системой, электроникой, охлаждением, выхлопом и кузовными элементами.</p>
+        <p>Также доступны отдельные направления обслуживания и дополнительного оснащения автомобиля. Перед визитом можно уточнить по телефону, выполняется ли нужная работа для вашей марки и модели.</p>
+        <a class="text-link" href="https://yandex.ru/maps/org/avtotsekh_1/181226150777/" target="_blank" rel="noopener">Открыть карточку на Яндекс Картах</a>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contacts">
+      <div class="contact-main">
+        <div class="eyebrow">КОНТАКТЫ</div>
+        <h2>Обсудим задачу<br><span>вашего автомобиля</span></h2>
+        <a class="contact-number" href="tel:+79063083900">+7 906 308-39-00</a>
+      </div>
+      <div class="contact-details">
+        <div class="contact-detail"><span>АДРЕС</span><strong>Энгельс, ул. Пушкина, 98</strong></div>
+        <div class="contact-detail"><span>ГРАФИК</span><strong>Пн — Сб · 09:00–18:00</strong></div>
+        <a class="button button-light" href="https://yandex.ru/maps/org/avtotsekh_1/181226150777/" target="_blank" rel="noopener">Построить маршрут</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><span>АВТОЦЕХ № 1</span><span>Автосервис · Энгельс</span><a href="tel:+79063083900">+7 906 308-39-00</a></footer>
+  <script src="script.js"></script>
+</body>
+</html>
