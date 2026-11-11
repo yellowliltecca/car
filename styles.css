@@ -732,7 +732,7 @@ body.intro-pending .hero-car { opacity: 0; }
     letter-spacing: .015em;
     text-align: center;
     text-transform: uppercase;
-    overflow-wrap: normal;
+    overflow-wrap: anywhere;
     transition: background .2s, color .2s, transform .2s, box-shadow .2s;
   }
   .wheel-mobile-choice--previous { left: 16%; top: 56%; }
