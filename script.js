@@ -297,20 +297,28 @@ updateWheel();
   let safetyTimer = null;
   let trackAnimations = [];
   let tracksPending = false;
-  let resizeHandler = null;
+  let introLayer = null;
+  let scrollSyncHandler = null;
   let orientationHandler = null;
+
+  const cleanupIntroLayer = () => {
+    if (scrollSyncHandler) {
+      window.removeEventListener('scroll', scrollSyncHandler);
+      scrollSyncHandler = null;
+    }
+    if (introLayer) {
+      introLayer.remove();
+      introLayer = null;
+    }
+  };
 
   const settleAtFinalLayout = (keepTracks = false) => {
     if (settled) return;
     settled = true;
     if (safetyTimer) window.clearTimeout(safetyTimer);
 
-    // Mobile browsers can emit a resize event when their address bar collapses
-    // during page scrolling. Remove listeners only when the intro really ends.
-    if (resizeHandler) {
-      window.removeEventListener('resize', resizeHandler);
-      resizeHandler = null;
-    }
+    // Scrolling never cancels the intro. Only a real device rotation ends it,
+    // because the measured parking position is no longer valid after rotation.
     if (orientationHandler) {
       window.removeEventListener('orientationchange', orientationHandler);
       orientationHandler = null;
@@ -332,8 +340,10 @@ updateWheel();
       trackAnimations.forEach(animation => { try { animation.cancel(); } catch (_) {} });
       tracksPending = false;
       scene.classList.add('is-hidden');
+      cleanupIntroLayer();
     } else if (!tracksPending) {
       scene.classList.add('is-hidden');
+      cleanupIntroLayer();
     }
     body.classList.remove('intro-pending');
     body.classList.add('intro-done');
@@ -424,9 +434,53 @@ updateWheel();
         duration = 4700;
       }
 
-      // Move the existing image element over the hero. Its measured width and
-      // height stay constant for the entire drive; no duplicate image appears.
-      hero.appendChild(heroCar);
+      // Put the existing car and its tyre marks in a viewport overlay. The
+      // overlay is shifted by the page scroll position, so the animation keeps
+      // its exact document-space path while the user scrolls the page.
+      const readScrollX = () => window.scrollX || document.documentElement.scrollLeft || 0;
+      const readScrollY = () => window.scrollY || document.documentElement.scrollTop || 0;
+      const syncOverlayToPageScroll = () => {
+        if (!introLayer) return;
+        introLayer.style.transform =
+          `translate3d(${-readScrollX()}px, ${-readScrollY()}px, 0)`;
+      };
+
+      introLayer = document.createElement('div');
+      introLayer.className = 'hero-intro-layer';
+      Object.assign(introLayer.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        width: '100vw',
+        height: '100vh',
+        overflow: 'visible',
+        pointerEvents: 'none',
+        zIndex: '8',
+        transformOrigin: '0 0',
+        willChange: 'transform'
+      });
+      syncOverlayToPageScroll();
+      body.appendChild(introLayer);
+
+      Object.assign(scene.style, {
+        position: 'absolute',
+        left: `${fmt(heroRect.left + readScrollX())}px`,
+        top: `${fmt(heroRect.top + readScrollY())}px`,
+        width: `${fmt(heroWidth)}px`,
+        height: `${fmt(heroHeight)}px`,
+        inset: 'auto',
+        display: 'block',
+        overflow: 'visible',
+        pointerEvents: 'none'
+      });
+      introLayer.appendChild(scene);
+
+      scrollSyncHandler = syncOverlayToPageScroll;
+      window.addEventListener('scroll', scrollSyncHandler, { passive: true });
+
+      // The scene itself is now the car's containing block. Its dimensions
+      // match the hero, so all measured start/end coordinates remain unchanged.
+      scene.appendChild(heroCar);
       movedToOverlay = true;
       Object.assign(heroCar.style, {
         position: 'absolute',
@@ -583,30 +637,27 @@ updateWheel();
 
       carAnimation.finished.then(() => {
         if (!settled) settleAtFinalLayout(true);
-      }).catch(() => {});
-
-      safetyTimer = window.setTimeout(() => {
+      }).catch(() => {
         if (!settled) settleAtFinalLayout(true);
-      }, duration + 1100);
+      });
 
-      // Scrolling on mobile may resize the *visible height* as browser
-      // chrome expands/collapses. That must not cancel the driving animation.
-      // Only finish early if the actual layout width changes substantially
-      // (for example, the phone is rotated during the intro).
-      const introLayoutWidth = document.documentElement.clientWidth || window.innerWidth;
-      resizeHandler = () => {
-        const currentLayoutWidth = document.documentElement.clientWidth || window.innerWidth;
-        if (Math.abs(currentLayoutWidth - introLayoutWidth) > 48) {
-          settleAtFinalLayout();
+      // A generous fallback only for a genuinely stalled animation. A brief
+      // frame drop while scrolling must never force the car to jump to parking.
+      safetyTimer = window.setTimeout(() => {
+        if (!settled && carAnimation) {
+          try { carAnimation.finish(); } catch (_) { settleAtFinalLayout(true); }
         }
-      };
+      }, duration + 9000);
+
+      // Do not listen to resize: mobile browser chrome changes viewport height
+      // during ordinary scrolling. That is not a layout change for this intro.
       orientationHandler = () => settleAtFinalLayout();
-      window.addEventListener('resize', resizeHandler, { passive: true });
       window.addEventListener('orientationchange', orientationHandler, { once: true });
 
       Promise.allSettled(trackAnimations.map(animation => animation.finished)).then(() => {
         tracksPending = false;
         scene.classList.add('is-hidden');
+        cleanupIntroLayer();
       });
     } catch (error) {
       settleAtFinalLayout();
